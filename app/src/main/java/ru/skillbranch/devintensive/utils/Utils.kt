@@ -9,7 +9,6 @@ object Utils {
             null to null
         }else {
             val parts: List<String>? = fullName.split(" ")
-            //val firstName = parts?.getOrElse(3) { 2.toString()}
             val firstName = parts?.getOrNull(0)
             val lastName = parts?.getOrNull(1)
             firstName to lastName
@@ -26,22 +25,6 @@ object Utils {
 
         return "${first?: ""} ${last?: ""}"
     }
-
-//    fun toInitials(firstName: String?, lastName: String?): String? {
-//        val first = firstName?.trim()?.capitalize()?.getOrNull(0)
-//        val last = lastName?.trim()?.capitalize()?.getOrNull(0)
-//        return if (first == null && last == null) null else "${first ?: ""}${last ?: ""}"
-//    }
-
-//    fun toInitials(firstName: String?, lastName: String?): String? {
-//        val first = firstName?.trimStart()?.firstOrNull()
-//        val second = lastName?.trimStart()?.firstOrNull()
-//
-//        return listOfNotNull(first, second)
-//            .joinToString("")
-//            .toUpperCase()
-//            .takeIf { it.isNotEmpty() }
-//    }
 
     fun transliteration(payload: String, divider: String? = " "): String {
         return payload.map {
