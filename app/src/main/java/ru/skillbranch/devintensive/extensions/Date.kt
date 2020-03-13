@@ -18,7 +18,6 @@ fun Date.add(value: Int, timeUnit: TimeUnits = TimeUnits.SECOND): Date {
     var time = this.time
 
     time += when (timeUnit) {
-        //"second", "seconds" -> value * SECOND
         TimeUnits.SECOND -> value * SECOND
         TimeUnits.MINUTE -> value * MINUTE
         TimeUnits.HOUR -> value * HOUR
