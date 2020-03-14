@@ -39,6 +39,7 @@
             android:background="@android:color/transparent"
             android:hint="@string/txt_ask_bender"
             android:imeOptions="actionDone"
+            android:singleLine="true"
             android:maxLines="1"
             android:paddingStart="@dimen/spacing_small_8"
             android:paddingEnd="@dimen/spacing_small_8"

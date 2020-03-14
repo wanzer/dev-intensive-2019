@@ -1,4 +1,4 @@
-package ru.skillbranch.devintensive.model
+package ru.skillbranch.devintensive.models
 
 class Chat(
     val id: String,
