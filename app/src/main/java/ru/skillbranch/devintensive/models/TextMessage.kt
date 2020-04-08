@@ -1,5 +1,6 @@
 package ru.skillbranch.devintensive.models
 
+import ru.skillbranch.devintensive.models.data.Chat
 import java.util.*
 
 class TextMessage(
@@ -8,6 +9,7 @@ class TextMessage(
     chat: Chat,
     isIncoming: Boolean = false,
     date: Date = Date(),
+    isReaded:Boolean = false,
     var text: String
 ) : BaseMessage(id, from, chat, isIncoming, date) {
     override fun formatMessage(): String {
