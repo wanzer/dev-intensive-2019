@@ -29,10 +29,12 @@ data class Chat(
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-    fun lastMessageShort(): String? = "Сообщений пока нет"
+    fun lastMessageShort(): Pair<String, String> {
+        return "Сooбщений ещё нет" to "@John Doe"
 //            Pair<String, String?> = when(val lastMessage = messages.lastOrNull()){
 //       //TODO implement me
 //    }
+    }
 
     private fun isSingle(): Boolean = members.size == 1
 
@@ -44,8 +46,7 @@ data class Chat(
                 user.avatar,
                 Utils.toInitials(user.firstName, user.lastName) ?: "??",
                 "${user.firstName ?: ""} ${user.lastName ?: ""}",
-               // lastMessageShort().first,
-                lastMessageShort(),
+                lastMessageShort().first,
                 unreadableMessageCount(),
                 lastMessageDate()?.shortFormat(),
                 user.isOnline
@@ -56,14 +57,12 @@ data class Chat(
                 null,
                 "",
                 title,
-                //lastMessageShort().first,
-                lastMessageShort(),
+                lastMessageShort().first,
                 unreadableMessageCount(),
                 lastMessageDate()?.shortFormat(),
                 false,
                 ChatType.GROUP,
-              // lastMessageShort().second
-                lastMessageShort()
+                lastMessageShort().second
             )
         }
     }

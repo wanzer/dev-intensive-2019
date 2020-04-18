@@ -7,77 +7,99 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import kotlinx.android.extensions.LayoutContainer
+import kotlinx.android.synthetic.main.item_chat_group.*
 import kotlinx.android.synthetic.main.item_chat_single.*
+import kotlinx.android.synthetic.main.item_chat_single.tv_counter_single
+import kotlinx.android.synthetic.main.item_chat_single.tv_title_single
 import ru.skillbranch.devintensive.R
 import ru.skillbranch.devintensive.models.data.ChatItem
+import ru.skillbranch.devintensive.models.data.ChatType
 
-class ChatAdapter(var listener: (ChatItem)-> Unit) : RecyclerView.Adapter<ChatAdapter.ChatViewHolder>() {
+class ChatAdapter(var listener: (ChatItem)-> Unit) : RecyclerView.Adapter<ChatAdapter.ChatItemViewHolder>() {
 
-    var chatItems: List<ChatItem> = listOf()
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatViewHolder {
-        val inflater = LayoutInflater.from(parent.context)
-        val view = inflater.inflate(R.layout.item_chat_single, parent, false)
-        return ChatViewHolder(view)
+    companion object{
+        private const val ARCHIVE_TYPE = 0
+        private const val SINGLE_TYPE = 1
+        private const val GROUP_TYPE = 2
     }
 
-    override fun getItemCount(): Int = chatItems.size
+    var items: List<ChatItem> = listOf()
 
-    override fun onBindViewHolder(holder: ChatViewHolder, position: Int) {
-        holder.bind(chatItems[position], listener)
+    override fun getItemViewType(position: Int): Int = when(items[position].chatType){
+        ChatType.ARCHIVE -> ARCHIVE_TYPE
+        ChatType.SINGLE -> SINGLE_TYPE
+        ChatType.GROUP -> GROUP_TYPE
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChatItemViewHolder {
+        val inflater = LayoutInflater.from(parent.context)
+        return when(viewType){
+            SINGLE_TYPE -> SingleChatViewHolder(inflater.inflate(R.layout.item_chat_single, parent, false))
+            GROUP_TYPE -> GroupViewHolder(inflater.inflate(R.layout.item_chat_group, parent, false))
+            else -> SingleChatViewHolder(inflater.inflate(R.layout.item_chat_single, parent, false))
+        }
+    }
+
+    override fun getItemCount(): Int = items.size
+
+    override fun onBindViewHolder(holder: ChatItemViewHolder, position: Int) {
+        holder.bind(items[position], listener)
     }
 
     fun updateData(chatItems: List<ChatItem>) {
 
-        Log.d("M_Chat_adapter", "update data adapter - new data ${chatItems.size} hash : ${chatItems.hashCode()}" +
-        " old data ${this.chatItems.size} hash : ${chatItems.hashCode()}")
-
         val diffUtilCallBack = object : DiffUtil.Callback() {
             override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                this@ChatAdapter.chatItems[oldItemPosition] == chatItems[newItemPosition]
-
-            override fun getOldListSize(): Int = this@ChatAdapter.chatItems.size
-
-            override fun getNewListSize(): Int = chatItems.size
+                items[oldItemPosition].id == chatItems[newItemPosition].id
 
             override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
-                this@ChatAdapter.chatItems[oldItemPosition].hashCode() == chatItems[newItemPosition].hashCode()
+                items[oldItemPosition].hashCode() == chatItems[newItemPosition].hashCode()
+
+            override fun getOldListSize(): Int = items.size
+
+            override fun getNewListSize(): Int = chatItems.size
         }
 
         val diffResult = DiffUtil.calculateDiff(diffUtilCallBack)
-        this.chatItems = chatItems
+        items = chatItems
         diffResult.dispatchUpdatesTo(this)
     }
 
-    inner class ChatViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), LayoutContainer,
-        ChatItemTouchHelperCallBack.ItemTouchViewHolder {
+    abstract inner class ChatItemViewHolder(convertView: View): RecyclerView.ViewHolder(convertView), LayoutContainer{
         override val containerView: View?
             get() = itemView
 
-        fun bind(chatItem: ChatItem, listener: (ChatItem) -> Unit){
+        abstract fun bind(item: ChatItem, listener: (ChatItem) -> Unit)
+    }
 
-            if(chatItem.avatar == null){
+    inner class SingleChatViewHolder(itemView: View) : ChatItemViewHolder(itemView),
+        ChatItemTouchHelperCallBack.ItemTouchViewHolder {
+
+        override fun bind(item: ChatItem, listener: (ChatItem) -> Unit){
+
+            if(item.avatar == null){
                 //set initials to custom avatar view
             }else{
                 //set avatar from net
             }
 
-            sv_indicator.visibility = if (chatItem.isOnline) View.VISIBLE else View.GONE
+            sv_indicator.visibility = if (item.isOnline) View.VISIBLE else View.GONE
             with(tv_date_single){
-                visibility = if(chatItem.lastMessageDate != null) View.VISIBLE else View.GONE
-                text = chatItem.lastMessageDate
+                visibility = if(item.lastMessageDate != null) View.VISIBLE else View.GONE
+                text = item.lastMessageDate
             }
             with(tv_counter_single){
-                visibility = if(chatItem.messageCount > 0) View.VISIBLE else View.GONE
-                text = chatItem.messageCount.toString()
+                visibility = if(item.messageCount > 0) View.VISIBLE else View.GONE
+                text = item.messageCount.toString()
 
             }
-            tv_title_single.text = chatItem.title
-            tv_message_single.text = chatItem.shortDescription
+            tv_title_single.text = item.title
+            tv_message_single.text = item.shortDescription
 
             itemView.setOnClickListener {
-                listener.invoke(chatItem)
+                listener.invoke(item)
             }
         }
 
@@ -87,6 +109,46 @@ class ChatAdapter(var listener: (ChatItem)-> Unit) : RecyclerView.Adapter<ChatAd
 
         override fun onItemCleared() {
             itemView.setBackgroundColor(Color.WHITE)
+        }
+    }
+
+    inner class GroupViewHolder(itemView: View): ChatItemViewHolder(itemView), ChatItemTouchHelperCallBack.ItemTouchViewHolder {
+
+        override fun onItemSelected() {
+            itemView.setBackgroundColor(Color.LTGRAY)
+        }
+
+        override fun onItemCleared() {
+            itemView.setBackgroundColor(Color.WHITE)
+        }
+
+        override fun bind(item: ChatItem, listener: (ChatItem) -> Unit) {
+            if(item.avatar == null){
+                Glide.with(itemView).clear(iv_avatar_group)
+                //set initials to custom avatar view
+            }else{
+                Glide.with(itemView).load(item.avatar).into(iv_avatar_group)
+            }
+
+            with(tv_date_group){
+                visibility = if(item.lastMessageDate != null) View.VISIBLE else View.GONE
+                text = item.lastMessageDate
+            }
+            with(tv_counter_group){
+                visibility = if(item.messageCount > 0) View.VISIBLE else View.GONE
+                text = item.messageCount.toString()
+
+            }
+            tv_title_group.text = item.title
+            tv_message_group.text = item.shortDescription
+            with(tv_message_author){
+                visibility = if(item.messageCount > 0) View.VISIBLE else View.GONE
+                text = item.author
+            }
+
+            itemView.setOnClickListener {
+                listener.invoke(item)
+            }
         }
     }
 }

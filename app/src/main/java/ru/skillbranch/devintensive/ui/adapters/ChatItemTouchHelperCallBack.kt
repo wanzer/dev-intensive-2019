@@ -36,7 +36,7 @@ class ChatItemTouchHelperCallBack(
     }
 
     override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-        swipeListener.invoke(adapter.chatItems[viewHolder.adapterPosition])
+        swipeListener.invoke(adapter.items[viewHolder.adapterPosition])
     }
 
     override fun onSelectedChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
